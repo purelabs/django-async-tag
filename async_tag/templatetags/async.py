@@ -67,5 +67,5 @@ class AsyncNode(template.Node):
             </script>
         """.format(
             uuid=self.uuid,
-            output=output.replace('"', '\\"').replace('\n', '\\\n')
+            output=output.replace('\\', '\\\\').replace('/', '\\/').replace('"', '\\"').replace('\n', '\\n')
         )

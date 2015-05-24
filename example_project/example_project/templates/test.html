@@ -9,5 +9,13 @@
     {% block bar %}
         His name is {% async %}{{ my_name }}{% await %}[...]{% endasync %}.
     {% endblock %}
+
+    {% block baz %}
+    {% async %}
+        <script type="text/javascript">
+            console.log("---\nfoo \"bar\" \'baz'\n---");
+        </script>
+    {% endasync %}
+    {% endblock %}
 </body>
 </html>
