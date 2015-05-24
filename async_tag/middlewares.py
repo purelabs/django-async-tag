@@ -12,6 +12,8 @@ class AsyncMiddleware(object):
 
     def stream(self, request, response):
         content = response.content
+        content = content.replace('</body>', '').replace('</html>', '')
+
         content += """
             <script type="text/javascript">
                 document.dispatchEvent(new Event("DOMContentLoaded"));
@@ -22,3 +24,5 @@ class AsyncMiddleware(object):
 
         for async_request in request.async_requests:
             yield async_request() + '\n'
+
+        yield '</body></html>' + '\n'
