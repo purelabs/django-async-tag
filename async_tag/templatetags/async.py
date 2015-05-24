@@ -7,15 +7,23 @@ register = template.Library()
 
 @register.tag(name='async')
 def do_async(parser, token):
-    nodelist = parser.parse(('endasync',))
-    parser.delete_first_token()
-    return AsyncNode(nodelist)
+
+    states = {}
+    end_tag = 'endasync'
+    default_states = ['async', 'await']
+
+    while token.contents != end_tag:
+        current = token.contents
+        states[current.split()[0]] = parser.parse(default_states + [end_tag])
+        token = parser.next_token()
+
+    return AsyncNode(states)
 
 
 class AsyncNode(template.Node):
 
-    def __init__(self, nodelist):
-        self.nodelist = nodelist
+    def __init__(self, states):
+        self.states = states
         self.uuid = uuid.uuid4().hex
         self.context = None
 
@@ -26,17 +34,34 @@ class AsyncNode(template.Node):
         self.context = copy.copy(context)
         self.context['async_requests'].append(self.render_async)
 
-        return '<span id="async_{uuid}"></span>'.format(
-            uuid=self.uuid
+        await = ''
+        if self.states.get('await'):
+            await = self.states['await'].render(context)
+
+        return """
+            <span id="async_begin_{uuid}"></span>
+                {await}
+            <span id="async_end_{uuid}"></span>
+        """.format(
+            uuid=self.uuid,
+            await=await
         )
 
 
     def render_async(self):
-        output = self.nodelist.render(self.context)
+        output = self.states['async'].render(self.context)
 
         return """
             <script type="text/javascript">
-                document.getElementById("async_{uuid}").innerHTML = "{output}";
+                console.log('foo', currentElement.parentNode);
+                var currentElement = document.getElementById("async_begin_{uuid}");
+                currentElement.parentNode.insertBefore(currentElement, "{output}");
+
+                while (currentElement.id !== "async_end_{uuid}") {
+                    var nextElement = currentElement.nextSibling;
+                    currentElement.remove();
+                    currentElement = nextElement;
+                }
             </script>
         """.format(
             uuid=self.uuid,

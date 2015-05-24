@@ -3,10 +3,11 @@
 <html>
 <body>
     {% block foo %}
-        {% block bar %}
-            My name is {% async %}{{ my_name }}{% endasync %}.
-        {% endblock %}
-            His name is {% async %}{{ my_name }}{% endasync %}.
+        His name is {% async %}{{ my_name }}{% endasync %}.
+    {% endblock %}
+
+    {% block bar %}
+        His name is {% async %}{{ my_name }}{% await %}[...]{% endasync %}.
     {% endblock %}
 </body>
 </html>
