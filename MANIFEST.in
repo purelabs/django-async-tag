@@ -1,0 +1,2 @@
+include README.md
+recursive-include async_tag/templatetags *
