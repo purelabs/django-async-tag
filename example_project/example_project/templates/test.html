@@ -1,0 +1,12 @@
+{% load async %}
+
+<html>
+<body>
+    {% block foo %}
+        {% block bar %}
+            My name is {% async %}{{ my_name }}{% endasync %}.
+        {% endblock %}
+            His name is {% async %}{{ my_name }}{% endasync %}.
+    {% endblock %}
+</body>
+</html>
