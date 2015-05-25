@@ -1,4 +1,5 @@
 from django import template
+from functools import partial
 
 import copy
 import uuid
@@ -27,7 +28,6 @@ class AsyncNode(template.Node):
     def __init__(self, nodelist_async, nodelist_await=None):
         self.nodelist_async = nodelist_async
         self.nodelist_await = nodelist_await if nodelist_await is not None else template.NodeList()
-        self.uuid = uuid.uuid4().hex
 
 
     def __iter__(self):
@@ -41,17 +41,19 @@ class AsyncNode(template.Node):
         if not 'async_renderings' in context:
             raise Exception("ContextProcessor 'async_tag.context_processors.async' required.")
 
-        self.context = copy.copy(context)
-        self.context['async_renderings'].append(self.render_async)
+        _uuid = uuid.uuid4().hex
+        _context = copy.copy(context) # Copy instance attributes
+        _context.dicts = [_context.flatten()] # Copy context data
+        _context['async_renderings'].append(partial(self.render_async, _uuid, _context))
 
         return '<span id="async_begin_{uuid}"></span>{await}<span id="async_end_{uuid}"></span>'.format(
-            uuid=self.uuid,
+            uuid=_uuid,
             await=self.nodelist_await.render(context)
         )
 
 
-    def render_async(self):
-        output = self.nodelist_async.render(self.context)
+    def render_async(self, uuid, context):
+        output = self.nodelist_async.render(context)
 
         return """
             <script type="text/javascript">
@@ -66,6 +68,6 @@ class AsyncNode(template.Node):
                 endElement.outerHTML = "{output}";
             </script>
         """.format(
-            uuid=self.uuid,
+            uuid=uuid,
             output=output.replace('\\', '\\\\').replace('/', '\\/').replace('"', '\\"').replace('\n', '\\n')
         )

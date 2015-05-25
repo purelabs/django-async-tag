@@ -17,5 +17,14 @@
         </script>
     {% endasync %}
     {% endblock %}
+
+    <h1>Products</h1>
+    {% async %}
+    <ul>
+        {% for product in products %}
+        <li>{{ product.name }} (rating: {% async %}{{ product.rating }}{% await %}loading rating for {{ product.name }}...{% endasync %})</li>
+        {% endfor %}
+    </ul>
+    {% endasync %}
 </body>
 </html>
