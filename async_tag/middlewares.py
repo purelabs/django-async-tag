@@ -11,13 +11,19 @@ class AsyncMiddleware(object):
 
     def process_response(self, request, response):
         if hasattr(request, 'async_renderings') and request.async_renderings:
+            if not 200 <= response.status_code < 300:
+                return response
+
             if response.streaming:
                 raise Exception('async template tag only allowed for non streaming response')
 
             if not response.get('Content-Type', '').startswith('text/html'):
                 raise Exception("async template tag only allowed for response with Content-Type 'text/html'")
 
-            return StreamingHttpResponse(self.stream(request, response))
+            streaming_response = StreamingHttpResponse(self.stream(request, response))
+            streaming_response.__dict__.update(response.__dict__)
+
+            return streaming_response
 
         return response
 

@@ -8,7 +8,7 @@ def test(request):
         time.sleep(2)
         return 'Seb'
 
-    return render(request, 'test.html', {
+    response = render(request, 'test.html', {
         'my_name': get_name,
         'products': [
             Product('Phone'),
@@ -16,6 +16,10 @@ def test(request):
             Product('Car'),
         ]
     })
+
+    response.set_cookie('fake_session_id', 'jdfijeroiu093')
+
+    return response
 
 
 class Product(object):

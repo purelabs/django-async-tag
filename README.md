@@ -1,5 +1,4 @@
 # TODO
-- Copy Headers and Cookies from HttpResponse to StreamingHttpResponse
 - Use jQuery for inserting response chunks to execute scripts
 - Insert code in <script type="text/chunk"></script> to circumvent javascript escaping?
   Second script loads content of first script (jQuery)
