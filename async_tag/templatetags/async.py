@@ -2,10 +2,13 @@ from django import template
 from functools import partial
 
 import copy
+import re
 import uuid
 
 
 register = template.Library()
+
+re_end_script = re.compile('</script>', re.IGNORECASE)
 
 
 @register.tag
@@ -54,8 +57,10 @@ class AsyncNode(template.Node):
 
     def render_async(self, uuid, context):
         output = self.nodelist_async.render(context)
+        output = re_end_script.sub('<\\/script>', output)
 
         return """
+            <script type="text/plain" id="async_{uuid}">{output}</script>
             <script type="text/javascript">
                 var startElement = document.getElementById("async_begin_{uuid}");
                 var endElement = document.getElementById("async_end_{uuid}");
@@ -65,9 +70,9 @@ class AsyncNode(template.Node):
                     element.remove();
                     element = nextElement;
                 }}
-                endElement.outerHTML = "{output}";
+                endElement.outerHTML = document.getElementById('async_{uuid}').textContent.replace('<\\\\/script>', '</' + 'script>');
             </script>
         """.format(
             uuid=uuid,
-            output=output.replace('\\', '\\\\').replace('/', '\\/').replace('"', '\\"').replace('\n', '\\n')
+            output=output
         )
