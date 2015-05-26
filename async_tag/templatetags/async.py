@@ -61,17 +61,7 @@ class AsyncNode(template.Node):
 
         return """
             <script type="text/plain" id="async_{uuid}">{output}</script>
-            <script type="text/javascript">
-                var startElement = document.getElementById("async_begin_{uuid}");
-                var endElement = document.getElementById("async_end_{uuid}");
-                var element = startElement;
-                while (element !== endElement) {{
-                    var nextElement = element.nextSibling;
-                    element.remove();
-                    element = nextElement;
-                }}
-                endElement.outerHTML = document.getElementById('async_{uuid}').textContent.replace('<\\\\/script>', '</' + 'script>');
-            </script>
+            <script type="text/javascript">async_tag.replaceAsyncTags('{uuid}');</script>
         """.format(
             uuid=uuid,
             output=output
