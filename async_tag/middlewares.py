@@ -38,12 +38,6 @@ class AsyncMiddleware(object):
         content = re_end_body.sub('', content)
         content = re_end_html.sub('', content)
 
-        content += """
-            <script type="text/javascript">
-                document.dispatchEvent(new Event("DOMContentLoaded"));
-            </script>
-        """
-
         yield content + '\n'
 
         for async_rendering in request.async_renderings:
