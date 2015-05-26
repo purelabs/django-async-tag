@@ -1,3 +1,4 @@
+from django.contrib.staticfiles.storage import staticfiles_storage
 from django.http import StreamingHttpResponse
 
 import re
@@ -39,6 +40,10 @@ class AsyncMiddleware(object):
         content = re_end_html.sub('', content)
 
         yield content + '\n'
+
+        yield '<script type="text/javascript" src="{src}"></script>'.format(
+            src=staticfiles_storage.url('async_tag/async.js'),
+        ) + '\n'
 
         for async_rendering in request.async_renderings:
             yield async_rendering() + '\n'

@@ -1,11 +1,6 @@
-{% load static %}
 {% load async %}
 <!doctype html>
 <html>
-    <head>
-        <script type="text/javascript" src="{% static 'async_tag/async.js' %}"></script>
-    </head>
-
     <body>
         {% block foo %}
             His name is {% async %}{{ my_name }}{% endasync %}.

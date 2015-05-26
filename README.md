@@ -32,21 +32,11 @@ TEMPLATES = [
 ]
 ```
 
-- Include async_tag javascript file:
-```html
-<script type="text/javascript" src="{% static 'async_tag/async.js' %}"></script>
-```
-
 - Enjoy async_tag:
 ```html
-{% load static %}
 {% load async %}
 <!doctype html>
 <html>
-    <head>
-        <script type="text/javascript" src="{% static 'async_tag/async.js' %}"></script>
-    </head>
-
     <body>
         <p>
         {% templatetag openvariable %} products {% templatetag closevariable %} can be a callable or an iterator loading products from database.<br>
