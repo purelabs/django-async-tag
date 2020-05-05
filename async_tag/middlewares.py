@@ -1,6 +1,8 @@
 from django.conf import settings
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.http import StreamingHttpResponse
+from django.utils.deprecation import MiddlewareMixin
+
 
 import re
 
@@ -9,7 +11,7 @@ re_end_body = re.compile('</body>', re.IGNORECASE)
 re_end_html = re.compile('</html>', re.IGNORECASE)
 
 
-class AsyncMiddleware(object):
+class AsyncMiddleware(MiddlewareMixin):
 
     def process_response(self, request, response):
         if hasattr(request, 'async_renderings') and request.async_renderings:
@@ -36,17 +38,25 @@ class AsyncMiddleware(object):
 
 
     def stream(self, request, response):
-        content = response.content
+        content = response.content.decode(response.charset)
         content = re_end_body.sub('', content)
         content = re_end_html.sub('', content)
 
-        yield content + '\n'
+        encode_content = lambda x: (x + '\n').encode(response.charset)
 
-        yield '<script type="text/javascript" src="{src}"></script>'.format(
-            src=staticfiles_storage.url('async_tag/async.js') if settings.DEBUG else staticfiles_storage.url('async_tag/async.min.js'),
-        ) + '\n'
+        yield encode_content(content)
+
+        yield encode_content(
+            '<script type="text/javascript" src="{src}"></script>'.format(
+                src=(
+                    staticfiles_storage.url('async_tag/async.js')
+                    if settings.DEBUG
+                    else staticfiles_storage.url('async_tag/async.min.js')
+                ),
+            )
+        )
 
         for async_rendering in request.async_renderings:
-            yield async_rendering() + '\n'
+            yield encode_content(async_rendering())
 
-        yield '</body></html>'
+        yield encode_content('</body></html>')

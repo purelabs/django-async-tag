@@ -11,8 +11,8 @@ register = template.Library()
 re_end_script = re.compile('</script>', re.IGNORECASE)
 
 
-@register.tag
-def async(parser, token):
+@register.tag(name='async')
+def _async(parser, token):
     nodelist_async = parser.parse(('await', 'endasync',))
     token = parser.next_token()
 
@@ -42,16 +42,16 @@ class AsyncNode(template.Node):
 
     def render(self, context):
         if not 'async_renderings' in context:
-            raise Exception("ContextProcessor 'async_tag.context_processors.async' required.")
+            raise Exception("ContextProcessor 'async_tag.context_processors.async_content' required.")
 
         _uuid = uuid.uuid4().hex
         _context = copy.copy(context) # Copy instance attributes
         _context.dicts = [_context.flatten()] # Copy context data
         _context['async_renderings'].append(partial(self.render_async, _uuid, _context))
 
-        return '<span id="async_begin_{uuid}"></span>{await}<span id="async_end_{uuid}"></span>'.format(
+        return '<span id="async_begin_{uuid}"></span>{await_content}<span id="async_end_{uuid}"></span>'.format(
             uuid=_uuid,
-            await=self.nodelist_await.render(context)
+            await_content=self.nodelist_await.render(context)
         )
 
 
