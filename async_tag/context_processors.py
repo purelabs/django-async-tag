@@ -1,4 +1,4 @@
-def async(request):
+def async_rendering(request):
     """
     Template tag async registers callbacks.
     Middleware AsyncMiddleware invokes callbacks.
